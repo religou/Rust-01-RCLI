@@ -1,19 +1,23 @@
+use crate::opts::OutputFormat;
 use csv::Reader;
 use serde_json::Value;
 use std::fs;
 
-pub fn process_csv(input: &str, output: &str) -> anyhow::Result<()> {
+pub fn process_csv(input: &str, output: String, format: OutputFormat) -> anyhow::Result<()> {
     println!("Processing CSV file: {}", input);
     let mut reader = Reader::from_path(input)?;
     let mut ret = Vec::with_capacity(128);
     let headers = reader.headers()?.clone();
     for result in reader.records() {
         let record = result?;
-        let json_value: Value = headers.iter().zip(record.iter()).collect();
-        ret.push(json_value);
+        let value: Value = headers.iter().zip(record.iter()).collect();
+        ret.push(value);
     }
 
-    let json = serde_json::to_string_pretty(&ret)?;
-    fs::write(output, json)?;
+    let content = match format {
+        OutputFormat::Json => serde_json::to_string_pretty(&ret)?,
+        OutputFormat::Yaml => serde_yaml::to_string(&ret)?,
+    };
+    fs::write(output, content)?;
     Ok(())
 }
