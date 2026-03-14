@@ -1,4 +1,10 @@
 use rand::seq::IndexedRandom;
+use rand::seq::SliceRandom;
+
+const UPPER: &[u8] = b"ABCDEFGHJKLMNPQRSTUVWXYZ";
+const LOWER: &[u8] = b"abcdefghijkmnopqrstuvwxyz";
+const NUMBERS: &[u8] = b"123456789";
+const SYMBOLS: &[u8] = b"!@#$%^&*()-_=+[]{}|;:,.<>?/";
 
 pub fn process_gen_pass(
     length: u8,
@@ -8,25 +14,30 @@ pub fn process_gen_pass(
     symbols: bool,
 ) -> anyhow::Result<()> {
     let mut rng = rand::rng();
-    let mut password = String::new();
+    let mut password = Vec::new();
     let mut charset: Vec<u8> = Vec::new();
 
     if uppercase {
-        charset.extend(b"ABCDEFGHJKLMNPQRSTUVWXYZ");
+        charset.extend(UPPER);
+        password.push(*UPPER.choose(&mut rng).unwrap());
     }
     if lowercase {
-        charset.extend(b"abcdefghijkmnopqrstuvwxyz");
+        charset.extend(LOWER);
+        password.push(*LOWER.choose(&mut rng).unwrap());
     }
     if numbers {
-        charset.extend(b"123456789");
+        charset.extend(NUMBERS);
+        password.push(*NUMBERS.choose(&mut rng).unwrap());
     }
     if symbols {
-        charset.extend(b"!@#$%^&*()-_=+[]{}|;:,.<>?/");
+        charset.extend(SYMBOLS);
+        password.push(*SYMBOLS.choose(&mut rng).unwrap());
     }
-    for _ in 0..length {
+    for _ in 0..(length - password.len() as u8) {
         let char = charset.choose(&mut rng).unwrap();
-        password.push(*char as char);
+        password.push(*char);
     }
-    println!("Generated password: {}", password);
+    password.shuffle(&mut rng);
+    println!("{}", String::from_utf8(password)?);
     Ok(())
 }
