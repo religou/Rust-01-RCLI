@@ -1,22 +1,6 @@
-// rcli csv -i input.csv -o output.json -d ',' --header
-// rcli genpass -l 16 --uppercase --lowercase --numbers --symbols
+use super::verify_file_exists;
 use clap::Parser;
-use std::{fmt, path::Path, str::FromStr};
-
-#[derive(Debug, Parser)]
-#[command(author, version, about, long_about = None)]
-pub struct Opts {
-    #[command(subcommand)]
-    pub cmd: Subcommand,
-}
-
-#[derive(Debug, Parser)]
-pub enum Subcommand {
-    #[command(name = "csv", about = "Show CSV, or Process CSV files to JSON")]
-    Csv(CsvOpts),
-    #[command(name = "genpass", about = "Generate random password")]
-    GenPass(GenPassOpts),
-}
+use std::{fmt, str::FromStr};
 
 #[derive(Debug, Clone, Copy)]
 pub enum OutputFormat {
@@ -40,32 +24,6 @@ pub struct CsvOpts {
 
     #[arg(long, help = "Include header row", default_value_t = true)]
     pub header: bool,
-}
-
-#[derive(Debug, Parser)]
-pub struct GenPassOpts {
-    #[arg(short, long, help = "Length of the password", default_value_t = 16)]
-    pub length: u8,
-
-    #[arg(long, help = "Include uppercase letters", default_value_t = true)]
-    pub uppercase: bool,
-
-    #[arg(long, help = "Include lowercase letters", default_value_t = true)]
-    pub lowercase: bool,
-
-    #[arg(long, help = "Include numbers", default_value_t = true)]
-    pub numbers: bool,
-
-    #[arg(long, help = "Include symbols", default_value_t = true)]
-    pub symbols: bool,
-}
-
-pub fn verify_file_exists(filename: &str) -> Result<String, String> {
-    if Path::new(filename).exists() {
-        Ok(filename.to_string())
-    } else {
-        Err(format!("File '{}' does not exist", filename))
-    }
 }
 
 pub fn parse_output_format(format: &str) -> Result<OutputFormat, anyhow::Error> {

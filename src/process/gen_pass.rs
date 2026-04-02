@@ -1,3 +1,4 @@
+use anyhow::Result;
 use rand::seq::IndexedRandom;
 use rand::seq::SliceRandom;
 use zxcvbn::zxcvbn;
@@ -13,7 +14,7 @@ pub fn process_gen_pass(
     lowercase: bool,
     numbers: bool,
     symbols: bool,
-) -> anyhow::Result<()> {
+) -> Result<()> {
     let mut rng = rand::rng();
     let mut password = Vec::new();
     let mut charset: Vec<u8> = Vec::new();
