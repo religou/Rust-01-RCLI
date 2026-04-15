@@ -1,7 +1,7 @@
 use clap::Parser;
 use rcli::{
-    process_csv, process_decode, process_encode, process_gen_pass, Base64SubCommand, Opts,
-    Subcommand,
+    process_csv, process_decode, process_encode, process_gen_pass, process_sign, process_verify,
+    Base64SubCommand, Opts, Subcommand, TextSignFormat, TextSubCommand,
 };
 
 fn main() -> anyhow::Result<()> {
@@ -31,6 +31,24 @@ fn main() -> anyhow::Result<()> {
             Base64SubCommand::Decode(opts) => {
                 process_decode(&opts.input, opts.format)?;
             }
+        },
+        Subcommand::Text(text_sub_command) => match text_sub_command {
+            TextSubCommand::Sign(opts) => match opts.format {
+                TextSignFormat::BLAKE3 => {
+                    process_sign(&opts.input, &opts.key, opts.format)?;
+                }
+                TextSignFormat::ED25519 => {
+                    println!("ED25519 signing is not implemented yet");
+                }
+            },
+            TextSubCommand::Verify(opts) => match opts.format {
+                TextSignFormat::BLAKE3 => {
+                    process_verify(&opts.input, &opts.key, &opts.sig, opts.format)?;
+                }
+                TextSignFormat::ED25519 => {
+                    println!("ED25519 verification is not implemented yet");
+                }
+            },
         },
     }
     Ok(())
